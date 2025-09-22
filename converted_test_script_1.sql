@@ -1,4 +1,4 @@
-```sql
+
 -- Create a file format for the data
 CREATE FILE FORMAT IF NOT EXISTS cust_file_format
   TYPE = 'CSV'
@@ -49,4 +49,3 @@ WHERE
     AND load_date = '2025-06-02'
 ORDER BY
     subscription;
-```
