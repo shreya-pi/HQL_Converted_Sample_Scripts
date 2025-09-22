@@ -1,64 +1,58 @@
 ```sql
 -- Create a file format for the data
-CREATE OR REPLACE FILE FORMAT contact_list_format
+CREATE FILE FORMAT IF NOT EXISTS csv_format
   TYPE = 'CSV'
   FIELD_DELIMITER = ','
   RECORD_DELIMITER = '\n'
-  SKIP_HEADER = TRUE;
+  SKIP_HEADER = 1;
 
 -- Create a stage for the data
-CREATE OR REPLACE STAGE contact_list_stage
-  FILE_FORMAT = contact_list_format;
+CREATE STAGE IF NOT EXISTS default_stage
+  URL = '@default_stage'
+  FILE_FORMAT = csv_format;
 
--- Copy data into the stage (assuming data is in a file named 'contact_list.csv')
-COPY INTO @contact_list_stage/contact_list.csv
-  FROM (SELECT * FROM @contact_list_stage);
+-- Copy data into the table
+-- NOTE: This step assumes that the data is already loaded into the stage.
+-- If not, you need to put the data into the stage first using the PUT command.
 
--- Create a table to store the contact list
-CREATE OR REPLACE TABLE contact_list (
+-- Create the table
+CREATE TABLE IF NOT EXISTS cust (
   customer_id INT,
-  full_name STRING,
+  first_name STRING,
+  last_name STRING,
   company STRING,
   email STRING,
   phone_1 STRING,
-  contact_priority STRING
+  website STRING,
+  load_date DATE
 );
 
--- Copy data into the contact list table
-COPY INTO contact_list
-  FROM (SELECT 
-          customer_id,
-          concat(first_name, ' ', last_name) AS full_name,
-          company,
-          email,
-          phone_1,
-          -- Use a CASE statement to create a new "contact_priority" column.
-          CASE
-            WHEN lower(website) LIKE 'https://%' THEN 'High (Secure Site)'
-            WHEN lower(website) LIKE 'http://%' THEN 'Normal (Standard Site)'
-            ELSE 'Unknown'
-          END AS contact_priority
-        FROM 
-          cust
-        WHERE 
-          -- Find all customers with a .com email address.
-          lower(email) LIKE '%.com'
-          AND load_date = '2025-06-02'
-      )
-  FILE_FORMAT = contact_list_format;
+-- Copy data into the table
+COPY INTO cust
+  FROM '@default_stage'
+  FILE_FORMAT = csv_format;
 
--- Query the contact list
-SELECT 
-  '--- Generated Contact List for ".com" Domain Customers ---';
-SELECT 
-  customer_id,
-  full_name,
-  company,
-  email,
-  phone_1,
-  contact_priority
-FROM 
-  contact_list
-ORDER BY 
-  contact_priority, full_name;
+-- Query: Generate a contact list for customers with a '.com' email address.
+-- Add a 'priority' field based on whether their website uses HTTPS.
+SELECT '--- Generated Contact List for ".com" Domain Customers ---';
+SELECT
+    customer_id,
+    CONCAT(first_name, ' ', last_name) AS full_name,
+    company,
+    email,
+    phone_1,
+    -- Use a CASE statement to create a new "contact_priority" column.
+    CASE
+        WHEN LOWER(website) LIKE 'https:%' THEN 'High (Secure Site)'
+        WHEN LOWER(website) LIKE 'http:%' THEN 'Normal (Standard Site)'
+        ELSE 'Unknown'
+    END AS contact_priority
+FROM
+    cust
+WHERE
+    -- Find all customers with a .com email address.
+    LOWER(email) LIKE '%.com'
+    AND load_date = '2025-06-02'
+ORDER BY
+    contact_priority, full_name;
 ```
