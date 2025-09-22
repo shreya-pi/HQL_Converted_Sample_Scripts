@@ -14,7 +14,7 @@ CREATE STAGE IF NOT EXISTS default_stage
 -- Copy data into the table
 COPY INTO cust (customer_id, first_name, last_name, company, email, phone_1, website, load_date)
   FROM (SELECT $1, $2, $3, $4, $5, $6, $7, $8
-        FROM '@~' (PATTERN => '.*\\.csv$') (FILE_FORMAT => 'csv_format'))
+        FROM '@~' (PATTERN => '.*\.csv$') (FILE_FORMAT => 'csv_format'))
   ON_ERROR = 'ABORT_SESSION';
 
 -- Query: Generate a contact list for customers with a '.com' email address.
