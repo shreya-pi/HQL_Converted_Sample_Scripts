@@ -33,7 +33,7 @@ FROM
     cust
 WHERE
     -- The '|' acts as an OR in the regular expression
-    company ILIKE '%group%' OR company ILIKE '%ltd%' OR company ILIKE '%llc%' OR company ILIKE '%and sons%' OR company ILIKE '%plc%'
+    LOWER(company) ILIKE '%group%' OR LOWER(company) ILIKE '%ltd%' OR LOWER(company) ILIKE '%llc%' OR LOWER(company) ILIKE '%and sons%' OR LOWER(company) ILIKE '%plc%'
     AND load_date = '2025-06-02'
 ORDER BY
     company;

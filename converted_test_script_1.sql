@@ -1,26 +1,15 @@
+```sql
+-- File: customer_segmentation.sql
+-- Purpose: Analyze customer distribution and identify customers from a specific cohort.
 
--- Create a file format for the data
-CREATE FILE FORMAT IF NOT EXISTS cust_file_format
-  TYPE = 'CSV'
-  FIELD_DELIMITER = ','
-  RECORD_DELIMITER = '\n'
-  SKIP_HEADER = TRUE;
-
--- Create a stage for the data
-CREATE STAGE IF NOT EXISTS cust_stage
-  FILE_FORMAT = cust_file_format;
-
--- Copy data into the table
-COPY INTO cust
-  FROM '@cust_stage/cust.csv'
-  FILE_FORMAT = cust_file_format;
+USE default; -- Or your database name
 
 -- Query 1: Count customers per country to understand geographic distribution.
 -- This helps identify top markets.
 SELECT '--- Query 1: Customer Count by Country ---';
 SELECT
     country,
-    COUNT(*) AS customer_count
+    COUNT(1) AS customer_count
 FROM
     cust
 WHERE
@@ -44,8 +33,9 @@ SELECT
 FROM
     cust
 WHERE
-    -- Use SUBSTR to extract the year from the 'YYYY-MM-DD' string format
-    SUBSTR(subscription, 1, 4) = '2021'
+    -- Use LEFT function to extract the year from the 'YYYY-MM-DD' string format
+    LEFT(subscription, 4) = '2021'
     AND load_date = '2025-06-02'
 ORDER BY
     subscription;
+```
