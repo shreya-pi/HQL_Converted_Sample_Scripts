@@ -1,19 +1,19 @@
 ```sql
 -- Create a file format for the data
-CREATE FILE FORMAT IF NOT EXISTS cust_file_format
+CREATE FILE FORMAT customer_file_format
   TYPE = 'CSV'
   FIELD_DELIMITER = ','
   RECORD_DELIMITER = '\n'
   SKIP_HEADER = TRUE;
 
 -- Create a stage for the data
-CREATE STAGE IF NOT EXISTS cust_stage
-  FILE_FORMAT = cust_file_format;
+CREATE STAGE customer_stage
+  FILE_FORMAT = customer_file_format;
 
--- Copy data into the table
+-- Copy data into the table from the stage
 COPY INTO cust
-  FROM '@cust_stage/cust.csv'
-  FILE_FORMAT = cust_file_format;
+  FROM '@customer_stage'
+  FILE_FORMAT = customer_file_format;
 
 -- Query 1: Count customers per country to understand geographic distribution.
 -- This helps identify top markets.
