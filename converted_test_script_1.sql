@@ -40,12 +40,13 @@ SELECT
     last_name,
     company,
     country,
-    subscription 
-FROM 
-    cust 
-WHERE 
-    SUBSTR(subscription, 1, 4) = '2021' 
-    AND load_date = '2025-06-02' 
-ORDER BY 
+    subscription -- This column holds the subscription date
+FROM
+    cust
+WHERE
+    -- Use SUBSTR to extract the year from the 'YYYY-MM-DD' string format
+    SUBSTR(subscription, 1, 4) = '2021'
+    AND load_date = '2025-06-02'
+ORDER BY
     subscription;
 ```
