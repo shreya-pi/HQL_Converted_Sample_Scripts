@@ -4,13 +4,13 @@ CREATE FILE FORMAT IF NOT EXISTS cust_file_format
   TYPE = 'CSV'
   FIELD_DELIMITER = ','
   RECORD_DELIMITER = '\n'
-  SKIP_HEADER = 1;
+  SKIP_HEADER = TRUE;
 
 -- Create a stage for the data
 CREATE STAGE IF NOT EXISTS cust_stage
   FILE_FORMAT = cust_file_format;
 
--- Copy data into the table
+-- Copy data into the table from the stage
 COPY INTO cust
   FROM '@cust_stage/cust.csv'
   FILE_FORMAT = cust_file_format;

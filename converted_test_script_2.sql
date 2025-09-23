@@ -1,19 +1,9 @@
 ```sql
--- Create a file format for the data
-CREATE FILE FORMAT IF NOT EXISTS cust_file_format
-  TYPE = 'CSV'
-  FIELD_DELIMITER = ','
-  RECORD_DELIMITER = '\n'
-  SKIP_HEADER = TRUE;
+-- File: data_quality_analysis.sql
+-- Purpose: Profile data to find patterns and potential data quality insights.
 
--- Create a stage for the data
-CREATE STAGE IF NOT EXISTS cust_stage
-  FILE_FORMAT = cust_file_format;
-
--- Copy data into the table
-COPY INTO cust (customer_id, company, country, email, load_date)
-  FROM '@cust_stage/cust.csv'
-  FILE_FORMAT = cust_file_format;
+-- Assuming cust is a table in the default schema
+USE default; 
 
 -- Query 1: Analyze the Top-Level Domains (TLDs) of customer emails.
 -- This can help understand the mix of corporate vs. personal emails.
@@ -33,7 +23,7 @@ ORDER BY
     email_count DESC;
 
 -- Query 2: Identify corporate customers whose company names contain "Group", "Ltd", "LLC", or "and Sons".
--- ILIKE is used for case-insensitive pattern matching.
+-- REGEXP_LIKE is used for pattern matching with regular expressions.
 SELECT '--- Query 2: Customers from Corporate Groups or Partnerships ---';
 SELECT
     customer_id,
@@ -44,7 +34,7 @@ FROM
     cust
 WHERE
     -- The '|' acts as an OR in the regular expression
-    company ILIKE '%group%' OR company ILIKE '%ltd%' OR company ILIKE '%llc%' OR company ILIKE '%and sons%' OR company ILIKE '%plc%'
+    REGEXP_LIKE(LOWER(company), 'group|ltd|llc|and sons|plc')
     AND load_date = '2025-06-02'
 ORDER BY
     company;
