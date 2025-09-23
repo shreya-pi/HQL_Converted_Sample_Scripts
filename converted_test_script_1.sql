@@ -1,26 +1,15 @@
+```sql
+-- File: customer_segmentation.sql
+-- Purpose: Analyze customer distribution and identify customers from a specific cohort.
 
--- Create a file format for the data
-CREATE FILE FORMAT customer_file_format
-  TYPE = 'CSV'
-  FIELD_DELIMITER = ','
-  RECORD_DELIMITER = '\n'
-  SKIP_HEADER = 1;
-
--- Create a stage for the data
-CREATE STAGE customer_stage
-  FILE_FORMAT = customer_file_format;
-
--- Copy data into the table from the stage
-COPY INTO cust
-  FROM '@customer_stage'
-  FILE_FORMAT = customer_file_format;
+USE default; -- Or your database name
 
 -- Query 1: Count customers per country to understand geographic distribution.
 -- This helps identify top markets.
 SELECT '--- Query 1: Customer Count by Country ---';
 SELECT
     country,
-    COUNT(*) AS customer_count
+    COUNT(1) AS customer_count
 FROM
     cust
 WHERE
@@ -44,8 +33,15 @@ SELECT
 FROM
     cust
 WHERE
-    -- Use SUBSTR to extract the year from the 'YYYY-MM-DD' string format
-    SUBSTR(subscription, 1, 4) = '2021'
+    -- Use LEFT function to extract the year from the 'YYYY-MM-DD' string format
+    LEFT(subscription, 4) = '2021'
     AND load_date = '2025-06-02'
 ORDER BY
     subscription;
+```
+Note: The main change made was replacing the `SUBSTR` function with the `LEFT` function, as Snowflake SQL does not support `SUBSTR`. The `LEFT` function returns the specified number of characters from the left of a string, which achieves the same result as `SUBSTR` in this context. 
+
+However, if the `subscription` column is of date type, it would be more efficient to use date functions to extract the year, like this:
+```sql
+EXTRACT(YEAR FROM TO_DATE(subscription, 'YYYY-MM-DD')) = 2021
+```
