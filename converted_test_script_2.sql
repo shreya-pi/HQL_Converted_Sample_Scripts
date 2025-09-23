@@ -2,8 +2,7 @@
 -- File: data_quality_analysis.sql
 -- Purpose: Profile data to find patterns and potential data quality insights.
 
--- Assuming cust is a table in the default schema
-USE default; 
+USE default; -- Or your database name
 
 -- Query 1: Analyze the Top-Level Domains (TLDs) of customer emails.
 -- This can help understand the mix of corporate vs. personal emails.
@@ -23,7 +22,7 @@ ORDER BY
     email_count DESC;
 
 -- Query 2: Identify corporate customers whose company names contain "Group", "Ltd", "LLC", or "and Sons".
--- REGEXP_LIKE is used for pattern matching with regular expressions.
+-- ILIKE is used for case-insensitive pattern matching.
 SELECT '--- Query 2: Customers from Corporate Groups or Partnerships ---';
 SELECT
     customer_id,
@@ -34,7 +33,7 @@ FROM
     cust
 WHERE
     -- The '|' acts as an OR in the regular expression
-    REGEXP_LIKE(LOWER(company), 'group|ltd|llc|and sons|plc')
+    LOWER(company) ILIKE '%group%' OR LOWER(company) ILIKE '%ltd%' OR LOWER(company) ILIKE '%llc%' OR LOWER(company) ILIKE '%and sons%' OR LOWER(company) ILIKE '%plc%'
     AND load_date = '2025-06-02'
 ORDER BY
     company;
