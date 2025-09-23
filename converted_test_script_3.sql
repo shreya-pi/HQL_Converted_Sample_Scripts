@@ -11,11 +11,26 @@ CREATE STAGE IF NOT EXISTS default_stage
   URL = '@default_stage'
   FILE_FORMAT = csv_format;
 
--- Copy data into the table (assuming the table 'cust' exists)
-COPY INTO cust (customer_id, first_name, last_name, company, email, phone_1, website, load_date)
-  FROM (SELECT $1, $2, $3, $4, $5, $6, $7, $8
-        FROM '@default_stage/cust.csv')
-  FILE_FORMAT = (TYPE = 'CSV' FIELD_DELIMITER = ',' RECORD_DELIMITER = '\n' SKIP_HEADER = 1);
+-- Copy data into the table
+-- NOTE: This step assumes that the data is already loaded into the stage.
+-- If not, you need to put the data into the stage first using the PUT command.
+
+-- Create the table
+CREATE TABLE IF NOT EXISTS cust (
+  customer_id INT,
+  first_name STRING,
+  last_name STRING,
+  company STRING,
+  email STRING,
+  phone_1 STRING,
+  website STRING,
+  load_date DATE
+);
+
+-- Copy data into the table
+COPY INTO cust
+  FROM '@default_stage'
+  FILE_FORMAT = csv_format;
 
 -- Query: Generate a contact list for customers with a '.com' email address.
 -- Add a 'priority' field based on whether their website uses HTTPS.

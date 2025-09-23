@@ -1,8 +1,19 @@
 ```sql
--- File: data_quality_analysis.sql
--- Purpose: Profile data to find patterns and potential data quality insights.
+-- Create a file format for the data
+CREATE FILE FORMAT IF NOT EXISTS cust_file_format
+  TYPE = 'CSV'
+  FIELD_DELIMITER = ','
+  RECORD_DELIMITER = '\n'
+  SKIP_HEADER = TRUE;
 
-USE default; -- Or your database name
+-- Create a stage for the data
+CREATE STAGE IF NOT EXISTS cust_stage
+  FILE_FORMAT = cust_file_format;
+
+-- Copy data into the table
+COPY INTO cust (customer_id, company, country, email, load_date)
+  FROM '@cust_stage/cust.csv'
+  FILE_FORMAT = cust_file_format;
 
 -- Query 1: Analyze the Top-Level Domains (TLDs) of customer emails.
 -- This can help understand the mix of corporate vs. personal emails.
