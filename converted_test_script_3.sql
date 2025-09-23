@@ -9,13 +9,13 @@ CREATE FILE FORMAT IF NOT EXISTS csv_format
 -- Create a stage for the data
 CREATE STAGE IF NOT EXISTS my_stage
   URL = 's3://my-bucket/data'
-  STORAGE_INTEGRATION = 'my_storage_integration'
-  FILE_FORMAT = csv_format;
+  STORAGE_INTEGRATION = 'my_storage_integration';
 
 -- Copy data into the table
 COPY INTO cust (customer_id, first_name, last_name, company, email, phone_1, website, load_date)
   FROM (SELECT $1, $2, $3, $4, $5, $6, $7, $8
-        FROM '@my_stage/data.csv' (file_format => 'csv_format'));
+        FROM '@my_stage/data.csv' (FILE_FORMAT = 'csv_format'))
+  ON_ERROR = 'SKIP_FILE';
 
 -- Query: Generate a contact list for customers with a '.com' email address.
 -- Add a 'priority' field based on whether their website uses HTTPS.
