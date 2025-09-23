@@ -10,7 +10,7 @@ CREATE FILE FORMAT IF NOT EXISTS cust_file_format
 CREATE STAGE IF NOT EXISTS cust_stage
   FILE_FORMAT = cust_file_format;
 
--- Copy data into the table from the stage
+-- Copy data into the table
 COPY INTO cust
   FROM '@cust_stage/cust.csv'
   FILE_FORMAT = cust_file_format;
