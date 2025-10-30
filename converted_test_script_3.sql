@@ -4,18 +4,17 @@ CREATE FILE FORMAT IF NOT EXISTS csv_format
   TYPE = 'CSV'
   FIELD_DELIMITER = ','
   RECORD_DELIMITER = '\n'
-  SKIP_HEADER = TRUE;
+  SKIP_HEADER = 1;
 
 -- Create a stage for the data
 CREATE STAGE IF NOT EXISTS default_stage
-  STORAGE_INTEGRATION = 'default_storage_integration'
-  URL = '@default_stage';
+  URL = '@default_stage'
+  FILE_FORMAT = csv_format;
 
--- Copy data into the table (assuming the table 'cust' exists)
-COPY INTO cust (customer_id, first_name, last_name, company, email, phone_1, website, load_date)
-  FROM (SELECT $1, $2, $3, $4, $5, $6, $7, $8
-        FROM '@default_stage/data.csv' (FILE_FORMAT => 'csv_format'))
-  ON_ERROR = 'ABORT_SESSION';
+-- Copy data into the table
+-- NOTE: Assuming the data is already loaded into the stage
+-- If not, use the following command to load the data into the stage
+-- PUT file://path/to/data.csv @default_stage;
 
 -- Query: Generate a contact list for customers with a '.com' email address.
 -- Add a 'priority' field based on whether their website uses HTTPS.
@@ -41,3 +40,5 @@ WHERE
 ORDER BY
     contact_priority, full_name;
 ```
+
+Note: Since there is no `LOAD DATA INPATH` statement in the provided HQL script, the `COPY INTO` command is not necessary. The script is already in a query format, so only minor adjustments were made to adapt it to Snowflake syntax. The `concat` function was replaced with `concat_ws` to handle null values, and the `LIKE` pattern was modified to use Snowflake's string matching syntax.
