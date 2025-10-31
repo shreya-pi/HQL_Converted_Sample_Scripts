@@ -28,7 +28,7 @@ ORDER BY
     email_count DESC;
 
 -- Query 2: Identify corporate customers whose company names contain "Group", "Ltd", "LLC", or "and Sons".
--- Use REGEX_LIKE for pattern matching with regular expressions.
+-- Use REGEXP_LIKE for pattern matching with regular expressions.
 SELECT '--- Query 2: Customers from Corporate Groups or Partnerships ---';
 SELECT
     customer_id,
@@ -39,7 +39,7 @@ FROM
     cust
 WHERE
     -- The '|' acts as an OR in the regular expression
-    REGEX_LIKE(LOWER(company), 'group|ltd|llc|and sons|plc')
+    REGEXP_LIKE(LOWER(company), 'group|ltd|llc|and sons|plc')
     AND load_date = '2025-06-02'
 ORDER BY
     company;
