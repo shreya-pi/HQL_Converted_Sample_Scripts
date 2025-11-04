@@ -1,17 +1,11 @@
 ```sql
--- Create a file format for the data
-CREATE FILE FORMAT IF NOT EXISTS default_file_format
-  TYPE = 'CSV'
-  FIELD_DELIMITER = ','
-  RECORD_DELIMITER = '\n'
-  SKIP_HEADER = TRUE;
+-- File: data_quality_analysis.sql
+-- Purpose: Profile data to find patterns and potential data quality insights.
 
--- Create a stage for the data
-CREATE STAGE IF NOT EXISTS default_external_stage
-  STORAGE_INTEGRATION = 'default_storage_integration'
-  URL = 's3://your-bucket-name/your-path';
+USE default; -- Or your database name
 
 -- Query 1: Analyze the Top-Level Domains (TLDs) of customer emails.
+-- This can help understand the mix of corporate vs. personal emails.
 SELECT '--- Query 1: Count of Customers by Email Domain ---';
 SELECT
     -- Use SPLIT_PART to get the part of the string after the last dot.
@@ -28,7 +22,7 @@ ORDER BY
     email_count DESC;
 
 -- Query 2: Identify corporate customers whose company names contain "Group", "Ltd", "LLC", or "and Sons".
--- Use REGEXP_LIKE for pattern matching with regular expressions.
+-- ILIKE is used for case-insensitive pattern matching.
 SELECT '--- Query 2: Customers from Corporate Groups or Partnerships ---';
 SELECT
     customer_id,
@@ -39,7 +33,7 @@ FROM
     cust
 WHERE
     -- The '|' acts as an OR in the regular expression
-    REGEXP_LIKE(LOWER(company), 'group|ltd|llc|and sons|plc')
+    LOWER(company) ILIKE '%group%' OR LOWER(company) ILIKE '%ltd%' OR LOWER(company) ILIKE '%llc%' OR LOWER(company) ILIKE '%and sons%' OR LOWER(company) ILIKE '%plc%'
     AND load_date = '2025-06-02'
 ORDER BY
     company;

@@ -1,19 +1,19 @@
 ```sql
 -- Create a file format for the data
-CREATE FILE FORMAT IF NOT EXISTS customer_file_format
+CREATE FILE FORMAT IF NOT EXISTS cust_file_format
   TYPE = 'CSV'
   FIELD_DELIMITER = ','
   RECORD_DELIMITER = '\n'
-  SKIP_HEADER = 1;
+  SKIP_HEADER = TRUE;
 
 -- Create a stage for the data
-CREATE STAGE IF NOT EXISTS customer_data_stage
-  FILE_FORMAT = customer_file_format;
+CREATE STAGE IF NOT EXISTS cust_stage
+  FILE_FORMAT = cust_file_format;
 
 -- Copy data into the table
 COPY INTO cust
-FROM '@customer_data_stage'
-FILE_FORMAT = customer_file_format;
+  FROM '@cust_stage/cust.csv'
+  STORAGE_INTEGRITY_CHECK = TRUE;
 
 -- Query 1: Count customers per country to understand geographic distribution.
 -- This helps identify top markets.
@@ -44,8 +44,8 @@ SELECT
 FROM
     cust
 WHERE
-    -- Use LEFT function to extract the year from the 'YYYY-MM-DD' string format
-    LEFT(subscription, 4) = '2021'
+    -- Use SUBSTR to extract the year from the 'YYYY-MM-DD' string format
+    SUBSTR(subscription, 1, 4) = '2021'
     AND load_date = '2025-06-02'
 ORDER BY
     subscription;
